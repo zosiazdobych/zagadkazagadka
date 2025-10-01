@@ -1,0 +1,390 @@
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Rebus: Si – N – Ca = Fe</title>
+  <meta name="description" content="Elektroniczna zagadka chemiczna z ukrytym króliczkiem i kodem QR" />
+  <style>
+    :root{
+      --bg:#0f1c2e;          /* granat */
+      --card:#162535;        /* ciemny granat */
+      --accent:#e8decf;      /* beż */
+      --muted:#b9c3cf;
+      --ok:#4bd37b;
+      --err:#ff6b6b;
+      --shadow:0 10px 30px rgba(0,0,0,.35);
+      --radius:18px;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif;
+      color:var(--accent);
+      background:
+        radial-gradient(1200px 600px at 20% -10%, #19324d 0%, transparent 60%),
+        radial-gradient(1000px 700px at 120% 10%, #1b2d45 0%, transparent 60%),
+        var(--bg);
+      min-height:100svh;
+      display:flex;align-items:center;justify-content:center;
+      padding:24px;
+      overflow-x:hidden;
+    }
+    .wrap{
+      width:min(980px,100%);
+      background:linear-gradient(180deg, #182536, #111a28);
+      border:1px solid rgba(255,255,255,.06);
+      box-shadow:var(--shadow);
+      border-radius:28px;
+      overflow:hidden;
+      position:relative;
+    }
+
+    /* ledwo widoczny "watermark" króliczka w tle */
+    .wrap::after{
+      content:"";
+      position:absolute; right:18px; top:18px;
+      width:42px; height:42px; opacity:.12;
+      background-repeat:no-repeat; background-size:contain;
+      filter:grayscale(1);
+      background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64"><g fill="%23e8decf"><circle cx="40" cy="18" r="8"/><circle cx="28" cy="20" r="7"/><ellipse cx="36" cy="36" rx="16" ry="12"/><circle cx="44" cy="36" r="3"/><circle cx="32" cy="36" r="3"/><path d="M25 10c3 0 6 8 6 12s-3 4-6 4-6-2-6-4 3-12 6-12z"/><path d="M44 8c3 0 8 10 8 14s-3 4-6 4-6-2-6-4 1-14 4-14z"/></g></svg>');
+      pointer-events:none;
+    }
+
+    header{ padding:28px 28px 8px; }
+    h1{margin:0;font-weight:800;letter-spacing:.2px}
+    p.sub{margin:.25rem 0 0;color:var(--muted)}
+
+    .card{
+      background:var(--card);
+      margin:20px;
+      border-radius:var(--radius);
+      padding:18px;
+      box-shadow:inset 0 0 0 1px rgba(255,255,255,.04);
+    }
+
+    /* puzzle */
+    .puzzle{
+      display:grid;
+      grid-template-columns: repeat(7, minmax(64px,1fr));
+      gap:12px;
+      padding:14px;
+      background:linear-gradient(180deg,#122033,#0f1a29);
+      border-radius:var(--radius);
+    }
+    .slot{
+      height:76px;
+      border:1.5px dashed rgba(232,222,207,.25);
+      border-radius:14px;
+      display:flex;align-items:center;justify-content:center;
+      color:var(--muted);
+      font-size:18px;
+      user-select:none;
+      transition:.2s ease;
+      background: rgba(255,255,255,0.02);
+    }
+    .slot.filled{border-style:solid;border-color:rgba(232,222,207,.5);background:rgba(255,255,255,.04)}
+    .tray{ display:flex;flex-wrap:wrap;gap:12px;margin-top:14px }
+    .tile{
+      padding:14px 18px;
+      background:#1b2c40;
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:12px;
+      cursor:grab;
+      font-weight:700;
+      font-size:20px;
+      letter-spacing:.5px;
+      user-select:none;
+      transition:transform .15s ease, background .15s ease, opacity .2s ease;
+    }
+    .tile:active{cursor:grabbing;transform:scale(.98)}
+    .tile[data-type="op"]{font-weight:800;opacity:.9}
+
+    .status{ margin-top:12px; font-size:14px; color:var(--muted); }
+    .status.ok{ color:var(--ok) }
+    .status.err{ color:var(--err) }
+
+    /* data */
+    .step-date{display:none;margin-top:10px}
+    .step-date.active{display:block;animation:fade .3s ease}
+    .inputs{ display:flex; gap:10px; flex-wrap:wrap; align-items:center }
+    input[type="text"]{
+      padding:12px 14px;
+      background:#0f1b2a;
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:12px;
+      color:var(--accent);
+      outline:none;
+      min-width:220px;
+      font-size:16px;
+    }
+    button{
+      padding:12px 16px;border:0;border-radius:12px;
+      background:linear-gradient(180deg,#1f3b5b,#1b314d);
+      color:var(--accent);font-weight:700;cursor:pointer;
+      box-shadow:0 6px 16px rgba(0,0,0,.25);
+    }
+    button:hover{filter:brightness(1.05)}
+    small.hint{color:var(--muted)}
+    .tip{color:#9fb3c6;font-size:13px;margin-top:6px}
+
+    /* QR */
+    .qr{ display:none; margin-top:12px; text-align:center }
+    .qr.active{ display:block; animation:pop .3s ease }
+    .qr img{ width:220px; height:220px; image-rendering:pixelated; border-radius:12px; box-shadow:var(--shadow); background:white }
+    .qr .placeholder{
+      width:220px;height:220px;border-radius:12px;
+      display:flex;align-items:center;justify-content:center;
+      border:2px dashed rgba(232,222,207,.35); color:var(--muted);
+      margin:0 auto; background:#0f1b2a;
+    }
+    .qr p{ color:var(--muted); margin:.5rem 0 0 }
+
+    /* duży króliczek po sukcesie */
+    .bunny-pop{
+      position:fixed; inset:auto 16px 16px auto; width:120px; height:120px; display:none;
+      animation:pop .35s ease forwards;
+      filter: drop-shadow(0 10px 25px rgba(0,0,0,.35));
+      z-index:50;
+    }
+    .bunny-pop.active{ display:block }
+    .bunny-pop img{ width:100%; height:100%; }
+
+    @keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+    @keyframes pop{from{opacity:0;transform:scale(.96)}to{opacity:1;transform:scale(1)}}
+
+    footer{padding:8px 28px 28px;color:var(--muted);font-size:12px}
+    .badge{display:inline-block;padding:6px 10px;border:1px solid rgba(255,255,255,.08);border-radius:10px}
+
+    /* mobile */
+    @media (max-width:720px){
+      .puzzle{ grid-template-columns: repeat(7, 1fr); }
+      .slot{ height:64px; font-size:16px }
+      .tile{ font-size:18px; padding:12px 14px }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap" role="application" aria-label="Rebus chemiczny z kodem QR">
+    <header>
+      <h1 title="kliknij kropkę nad i 3×, a królik pomacha 🐇">Rebus: ułóż równanie Si – N – Ca = Fe</h1>
+      <p class="sub">Po poprawnym ułożeniu wpisz datę – wtedy pojawi się kod QR (i króliczek).</p>
+    </header>
+
+    <div class="card" aria-live="polite">
+      <h2 style="margin:0 0 12px;font-size:18px;color:#cfd8e3;">Krok 1 — ułóż „Si – N – Ca = Fe”</h2>
+
+      <!-- SLOTY w kolejności docelowej -->
+      <div class="puzzle" id="puzzle">
+        <div class="slot" data-accept="Si" aria-label="miejsce na Si">Upuść tu</div>
+        <div class="slot" data-accept="-"  aria-label="miejsce na -">Upuść tu</div>
+        <div class="slot" data-accept="N"  aria-label="miejsce na N">Upuść tu</div>
+        <div class="slot" data-accept="-"  aria-label="miejsce na -">Upuść tu</div>
+        <div class="slot" data-accept="Ca" aria-label="miejsce na Ca">Upuść tu</div>
+        <div class="slot" data-accept="="  aria-label="miejsce na =">Upuść tu</div>
+        <div class="slot" data-accept="Fe" aria-label="miejsce na Fe">Upuść tu</div>
+      </div>
+
+      <div class="tray" id="tray" aria-label="kafelki do przeciągnięcia">
+        <!-- Kafelki w losowej kolejności -->
+        <div class="tile" draggable="true" data-key="Fe" aria-grabbed="false">Fe</div>
+        <div class="tile" draggable="true" data-key="-"  data-type="op" aria-grabbed="false">–</div>
+        <div class="tile" draggable="true" data-key="Si" aria-grabbed="false">Si</div>
+        <div class="tile" draggable="true" data-key="Ca" aria-grabbed="false">Ca</div>
+        <div class="tile" draggable="true" data-key="="  data-type="op" aria-grabbed="false">=</div>
+        <div class="tile" draggable="true" data-key="N"  aria-grabbed="false">N</div>
+        <div class="tile" draggable="true" data-key="-"  data-type="op" aria-grabbed="false">–</div>
+      </div>
+
+      <div id="status" class="status">Przeciągaj kafelki do slotów powyżej.</div>
+
+      <!-- Krok 2: data -->
+      <div class="step-date" id="stepDate">
+        <h2 style="margin:14px 0 10px;font-size:18px;color:#cfd8e3;">Krok 2 — wpisz datę</h2>
+        <div class="inputs">
+          <input id="dateInput" type="text" inputmode="numeric" autocomplete="off"
+                 placeholder="np. 14.07.2026" aria-label="Wpisz datę" />
+          <button id="checkBtn">Sprawdź</button>
+        </div>
+        <small class="hint">Akceptowane formaty: 14.07.2026, 14-07-2026, 14/07/2026</small>
+        <div class="tip">Podpowiedź: liczby atomowe (Si=14, N=7, Ca=20, Fe=26) → <strong>14-07-2026</strong>.</div>
+        <div id="dateMsg" class="status" role="status"></div>
+      </div>
+
+      <!-- Krok 3: QR -->
+      <div class="qr" id="qrBox" aria-hidden="true">
+        <!-- Jeśli ustawisz stały link w JS, obraz samo się podmieni -->
+        <div id="qrHolder" class="placeholder">Tu pojawi się kod QR</div>
+        <p id="qrCaption">Gratulacje! Dodaj swój link w kodzie, by wygenerować prawdziwy QR.</p>
+      </div>
+    </div>
+
+    <footer>
+      <span class="badge">Design: granat &amp; beż • mobile ready • ukryty króliczek 🐇</span>
+    </footer>
+  </div>
+
+  <!-- duży króliczek po sukcesie -->
+  <div class="bunny-pop" id="bunnyPop" aria-hidden="true">
+    <img alt="Króliczek" src='data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="180" height="180" viewBox="0 0 64 64"><defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="%23e8decf"/><stop offset="1" stop-color="%23cfc4b3"/></linearGradient></defs><g fill="url(%23g)"><circle cx="42" cy="20" r="10"/><circle cx="26" cy="22" r="9"/><ellipse cx="34" cy="40" rx="18" ry="13"/><circle cx="44" cy="38" r="3"/><circle cx="30" cy="38" r="3"/><path d="M22 8c3 0 7 10 7 15s-3 4-7 4-7-2-7-4 4-15 7-15z"/><path d="M44 6c4 0 9 12 9 17s-3 4-7 4-7-2-7-4 1-17 5-17z"/></g></svg>'/>
+  </div>
+
+  <script>
+    /* ====== USTAWIENIA DO PODMIANY PRZEZ CIEBIE ======
+       1) Jeśli znasz już link/tekst, do którego ma prowadzić kod QR – wpisz go tu:
+    */
+    const QR_DATA = ""; // <- wpisz docelowy URL/tekst, np. "https://twoj-link.pl/sekret"
+    /*  2) Jeśli chcesz trzymać datę zagadki inną niż 14-07-2026, zmień poniżej expected. */
+    const expected = { dd:14, mm:7, yyyy:2026 };
+
+    // ====== LOGIKA PUZZLI ======
+    const slots = [...document.querySelectorAll('.slot')];
+    const status = document.getElementById('status');
+    const stepDate = document.getElementById('stepDate');
+    const dateInput = document.getElementById('dateInput');
+    const dateMsg = document.getElementById('dateMsg');
+    const qrBox = document.getElementById('qrBox');
+    const qrHolder = document.getElementById('qrHolder');
+    const qrCaption = document.getElementById('qrCaption');
+    const bunnyPop = document.getElementById('bunnyPop');
+
+    // Drag&drop
+    document.querySelectorAll('.tile').forEach(tile=>{
+      tile.addEventListener('dragstart', e=>{
+        e.dataTransfer.setData('text/plain', tile.dataset.key);
+        tile.classList.add('dragging');
+        tile.setAttribute('aria-grabbed','true');
+      });
+      tile.addEventListener('dragend', e=>{
+        tile.classList.remove('dragging');
+        tile.setAttribute('aria-grabbed','false');
+      });
+    });
+
+    slots.forEach(slot=>{
+      slot.addEventListener('dragover', e=>{ e.preventDefault(); slot.style.transform='scale(1.02)'; });
+      slot.addEventListener('dragleave', ()=>{ slot.style.transform='none'; });
+      slot.addEventListener('drop', e=>{
+        e.preventDefault();
+        slot.style.transform='none';
+        const key = e.dataTransfer.getData('text/plain');
+        const needed = slot.dataset.accept;
+        if(slot.dataset.filled==='1'){ bounce(slot); return; }
+        const tile = [...document.querySelectorAll('.tile')].find(t=>t.dataset.key===key && !t.dataset.placed);
+        if(!tile){ bounce(slot); return; }
+        if(needed === key){
+          slot.textContent = tile.textContent;
+          slot.classList.add('filled');
+          slot.dataset.filled = '1';
+          tile.dataset.placed = '1';
+          tile.style.opacity = .35;
+          tile.style.pointerEvents = 'none';
+          checkSolved();
+        }else{
+          shake(slot);
+        }
+      });
+    });
+
+    function checkSolved(){
+      const allOk = slots.every(s=>s.dataset.filled==='1');
+      if(allOk){
+        status.textContent = 'Brawo! Ułożono poprawnie: Si – N – Ca = Fe.';
+        status.classList.remove('err'); status.classList.add('ok');
+        stepDate.classList.add('active');
+        dateInput.focus();
+      }else{
+        const filled = slots.filter(s=>s.dataset.filled==='1').length;
+        status.textContent = `Postęp: ${filled}/${slots.length}`;
+      }
+    }
+
+    function shake(el){
+      el.animate([{transform:'translateX(0)'},{transform:'translateX(-6px)'},{transform:'translateX(6px)'},{transform:'translateX(0)'}],{duration:200});
+      status.textContent = 'Nie ten kafelek. Spróbuj inny.';
+      status.classList.remove('ok'); status.classList.add('err');
+    }
+    function bounce(el){
+      el.animate([{transform:'scale(1)'},{transform:'scale(1.04)'},{transform:'scale(1)'}],{duration:160});
+    }
+
+    // ====== WALIDACJA DATY ======
+    document.getElementById('checkBtn').addEventListener('click', verifyDate);
+    dateInput.addEventListener('keydown', e=>{ if(e.key==='Enter') verifyDate(); });
+    dateInput.addEventListener('input', ()=>{ dateInput.value = dateInput.value.replace(/\s+/g,'.'); });
+
+    function normalizeDate(str){
+      if(!str) return null;
+      const cleaned = str.trim().replace(/[–—]/g,'-');
+      const parts = cleaned.split(/[.\-\/]/).map(s=>s.trim());
+      if(parts.length!==3) return null;
+      const [d,m,y] = parts.map(p=>parseInt(p,10));
+      if(Number.isNaN(d)||Number.isNaN(m)||Number.isNaN(y)) return null;
+      return {dd:d, mm:m, yyyy:y};
+    }
+
+    function verifyDate(){
+      const got = normalizeDate(dateInput.value);
+      if(!got){
+        dateMsg.textContent = 'Wpisz datę w formacie dd.mm.rrrr (np. 14.07.2026).';
+        dateMsg.className = 'status err';
+        qrBox.classList.remove('active');
+        return;
+      }
+      if(got.dd===expected.dd && got.mm===expected.mm && got.yyyy===expected.yyyy){
+        dateMsg.textContent = 'Data poprawna! Odsłaniam kod QR.';
+        dateMsg.className = 'status ok';
+        showQR();
+        showBunny();
+      }else{
+        dateMsg.textContent = 'To nie ta data. Podpowiedź: Si=14, N=7, Ca=20, Fe=26.';
+        dateMsg.className = 'status err';
+        qrBox.classList.remove('active');
+        bunnyPop.classList.remove('active');
+      }
+    }
+
+    // ====== QR: jeśli QR_DATA ustawione -> wstaw realny QR przez publiczne API; w innym razie placeholder ======
+    function showQR(){
+      qrBox.classList.add('active');
+      qrBox.setAttribute('aria-hidden','false');
+
+      if (QR_DATA && QR_DATA.trim().length){
+        const url = "https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=" + encodeURIComponent(QR_DATA.trim());
+        const img = new Image();
+        img.width = 220; img.height = 220; img.alt = "Kod QR";
+        img.onload = ()=>{
+          qrHolder.replaceWith(img);
+          qrCaption.textContent = 'Zeskanuj kod QR.';
+        };
+        img.onerror = ()=>{
+          qrCaption.textContent = 'Nie udało się pobrać QR. Sprawdź połączenie lub wstaw później.';
+        };
+        img.src = url;
+      } else {
+        qrCaption.innerHTML = 'Ustaw najpierw docelowy link w pliku (stała <code>QR_DATA</code>).';
+      }
+    }
+
+    // ====== KRÓLICZEK: mały watermark już jest. Po sukcesie wyskakuje większy. ======
+    function showBunny(){
+      bunnyPop.classList.add('active');
+      bunnyPop.setAttribute('aria-hidden','false');
+      // schowaj po 6 s
+      setTimeout(()=>{ bunnyPop.classList.remove('active'); }, 6000);
+    }
+
+    // Easter egg: 3× klik w kropkę nad „i” w nagłówku -> królik także wyskoczy
+    (function(){
+      const h1 = document.querySelector('h1');
+      let clicks = 0, timer = null;
+      h1.addEventListener('click', e=>{
+        clicks++;
+        clearTimeout(timer);
+        timer = setTimeout(()=>{ clicks=0; }, 800);
+        if(clicks>=3){ showBunny(); clicks=0; }
+      });
+    })();
+  </script>
+</body>
+</html>
