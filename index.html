@@ -164,7 +164,7 @@
     function verifyDate(){
       const got = normalizeDate(dateInput.value);
       if(!got){
-        dateMsg.textContent = 'Podaj datę w formacie dd.mm.rrrr';
+        dateMsg.textContent = 'Podaj w formacie dd.mm.rrrr';
         dateMsg.className = 'status err';
         qrBox.classList.remove('active');
         return;
