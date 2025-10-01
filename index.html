@@ -7,9 +7,9 @@
   <meta name="description" content="Zagadkowa strona: znajdź datę ukrytą w równaniu pierwiastków" />
   <style>
     :root{
-      --bg:#0f1c2e;          /* granat */
-      --card:#162535;        /* ciemny granat */
-      --accent:#e8decf;      /* beż */
+      --bg:#0f1c2e;          /* granat (tło) */
+      --card:#162535;        /* ciemny granat (panel) */
+      --accent:#e8decf;      /* beż (tekst/królik) */
       --muted:#b9c3cf;
       --ok:#4bd37b;
       --err:#ff6b6b;
@@ -38,17 +38,36 @@
       border-radius:28px;
       overflow:hidden;
       position:relative;
+      isolation:isolate;
     }
-    /* ledwo widoczny "watermark" króliczka w tle */
-    .wrap::after{
+
+    /* duży, subtelny królik w tle (watermark) */
+    .wrap::before{
       content:"";
-      position:absolute; right:18px; top:18px;
-      width:42px; height:42px; opacity:.12;
-      background-repeat:no-repeat; background-size:contain;
-      filter:grayscale(1);
-      background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64"><g fill="%23e8decf"><circle cx="40" cy="18" r="8"/><circle cx="28" cy="20" r="7"/><ellipse cx="36" cy="36" rx="16" ry="12"/><circle cx="44" cy="36" r="3"/><circle cx="32" cy="36" r="3"/><path d="M25 10c3 0 6 8 6 12s-3 4-6 4-6-2-6-4 3-12 6-12z"/><path d="M44 8c3 0 8 10 8 14s-3 4-6 4-6-2-6-4 1-14 4-14z"/></g></svg>');
+      position:absolute;
+      right:24px;        /* możesz przesunąć, jeśli chcesz */
+      top:24px;
+      width:min(34vw, 260px);   /* większy królik */
+      height:min(34vw, 260px);
+      opacity:.10;       /* bardzo delikatny */
       pointer-events:none;
+      background-repeat:no-repeat; background-size:contain; background-position:center;
+      filter:grayscale(1);
+      /* proste line-art SVG głowy królika (realistyczny kontur) */
+      background-image:url('data:image/svg+xml;utf8,\
+<svg xmlns="http://www.w3.org/2000/svg" viewBox=\"0 0 200 200\">\
+<g fill=\"none\" stroke=\"%23e8decf\" stroke-width=\"6\" stroke-linecap=\"round\" stroke-linejoin=\"round\">\
+<path d=\"M60 22c-14 0-26 22-26 44 0 17 7 26 15 30\"/>\
+<path d=\"M140 22c14 0 26 22 26 44 0 17-7 26-15 30\"/>\
+<circle cx=\"100\" cy=\"118\" r=\"54\"/>\
+<circle cx=\"78\" cy=\"110\" r=\"6\"/><circle cx=\"122\" cy=\"110\" r=\"6\"/>\
+<path d=\"M88 134c8 8 16 8 24 0\"/>\
+<path d=\"M48 96c14-8 34-14 52-14s38 6 52 14\"/>\
+<path d=\"M38 66c8 10 20 16 36 18\" opacity=\".6\"/>\
+<path d=\"M162 66c-8 10-20 16-36 18\" opacity=\".6\"/>\
+</g></svg>');
     }
+
     header{ padding:28px 28px 8px; }
     h1{margin:0;font-weight:800;letter-spacing:.2px}
     p.sub{margin:.25rem 0 0;color:var(--muted)}
@@ -61,7 +80,7 @@
       box-shadow:inset 0 0 0 1px rgba(255,255,255,.04);
     }
 
-    /* EKSPOZYCJA RÓWNANIA */
+    /* ekspozycja równania */
     .equation{
       display:flex; align-items:center; justify-content:center;
       gap:18px; padding:22px;
@@ -105,47 +124,43 @@
       box-shadow:0 6px 16px rgba(0,0,0,.25);
     }
     button:hover{filter:brightness(1.05)}
-    small.hint{color:var(--muted)}
-    .tip{color:#9fb3c6;font-size:13px;margin-top:6px}
 
     /* QR */
     .qr{ display:none; margin-top:12px; text-align:center }
     .qr.active{ display:block; animation:pop .3s ease }
-    .qr img{ width:220px; height:220px; image-rendering:pixelated; border-radius:12px; box-shadow:var(--shadow); background:white }
+    .qr img{ width:240px; height:240px; image-rendering:pixelated; border-radius:12px; box-shadow:var(--shadow); background:white }
     .qr .placeholder{
-      width:220px;height:220px;border-radius:12px;
+      width:240px;height:240px;border-radius:12px;
       display:flex;align-items:center;justify-content:center;
       border:2px dashed rgba(232,222,207,.35); color:var(--muted);
       margin:0 auto; background:#0f1b2a;
     }
     .qr p{ color:var(--muted); margin:.5rem 0 0 }
 
-    /* duży króliczek po sukcesie */
+    /* królik po sukcesie – większy */
     .bunny-pop{
-      position:fixed; inset:auto 16px 16px auto; width:120px; height:120px; display:none;
+      position:fixed; inset:auto 20px 20px auto; width:160px; height:160px; display:none;
       animation:pop .35s ease forwards;
       filter: drop-shadow(0 10px 25px rgba(0,0,0,.35));
-      z-index:50;
+      z-index:50; opacity:.95;
     }
     .bunny-pop.active{ display:block }
     .bunny-pop img{ width:100%; height:100%; }
 
     @keyframes pop{from{opacity:0;transform:scale(.96)}to{opacity:1;transform:scale(1)}}
 
-    footer{padding:8px 28px 28px;color:var(--muted);font-size:12px}
-    .badge{display:inline-block;padding:6px 10px;border:1px solid rgba(255,255,255,.08);border-radius:10px}
-
     /* mobile */
     @media (max-width:720px){
       .el,.op{ height:64px; min-width:60px; font-size:22px }
+      .wrap::before{ width:200px; height:200px; }
     }
   </style>
 </head>
 <body>
   <div class="wrap" role="application" aria-label="Zagadka chemiczna z kodem QR">
     <header>
-      <h1 title="kliknij w nagłówek 3× — króliczek pomacha 🐇">Si – N – Ca = Fe</h1>
-      <p class="sub">Masz wszystko, czego potrzebujesz. Wpisz właściwą <em>datę</em> i odsłoń nagrodę.</p>
+      <h1>Si – N – Ca = Fe</h1>
+      <p class="sub">Wpisz właściwą datę i odsłoń nagrodę.</p>
     </header>
 
     <div class="card" aria-live="polite">
@@ -159,20 +174,15 @@
         <div class="el">Fe</div>
       </div>
 
-      <div class="status" id="status">Podpowiedź subtelna: pomyśl, co „kryje się” za każdym symbolem…</div>
+      <div class="status" id="status">…</div>
 
       <div class="step-date" id="stepDate">
         <div class="inputs" style="margin-top:12px">
           <input id="dateInput" type="text" inputmode="numeric" autocomplete="off"
                  placeholder="dd.mm.rrrr" aria-label="Wpisz datę" />
           <button id="checkBtn">Sprawdź</button>
-          <!-- Dyskretna podpowiedź rozwijana -->
-          <details style="margin-left:4px">
-            <summary>?</summary>
-            <div class="tip">Jeśli utkniesz: zamień symbole na ich <em>liczby atomowe</em>, a zapis ułóż jak datę.</div>
-          </details>
         </div>
-        <small class="hint">Akceptowane formaty: 14.07.2026, 14-07-2026, 14/07/2026</small>
+        <!-- usunięto: „akceptowane formaty” + dodatkowe podpowiedzi -->
         <div id="dateMsg" class="status" role="status"></div>
       </div>
 
@@ -182,27 +192,18 @@
         <p id="qrCaption">Dodaj swój link w kodzie, aby wygenerować prawdziwy QR.</p>
       </div>
     </div>
-
-    <footer>
-      <span class="badge">Design: granat &amp; beż • mobile ready • ukryty króliczek 🐇</span>
-    </footer>
   </div>
 
-  <!-- duży króliczek po sukcesie -->
+  <!-- królik po sukcesie -->
   <div class="bunny-pop" id="bunnyPop" aria-hidden="true">
-    <img alt="Króliczek" src='data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="180" height="180" viewBox="0 0 64 64"><defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="%23e8decf"/><stop offset="1" stop-color="%23cfc4b3"/></linearGradient></defs><g fill="url(%23g)"><circle cx="42" cy="20" r="10"/><circle cx="26" cy="22" r="9"/><ellipse cx="34" cy="40" rx="18" ry="13"/><circle cx="44" cy="38" r="3"/><circle cx="30" cy="38" r="3"/><path d="M22 8c3 0 7 10 7 15s-3 4-7 4-7-2-7-4 4-15 7-15z"/><path d="M44 6c4 0 9 12 9 17s-3 4-7 4-7-2-7-4 1-17 5-17z"/></g></svg>'/>
+    <img alt="Króliczek" src='data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200"><g fill="none" stroke="%23e8decf" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"><path d="M60 22c-14 0-26 22-26 44 0 17 7 26 15 30"/><path d="M140 22c14 0 26 22 26 44 0 17-7 26-15 30"/><circle cx="100" cy="118" r="54"/><circle cx="78" cy="110" r="6"/><circle cx="122" cy="110" r="6"/><path d="M88 134c8 8 16 8 24 0"/></g></svg>'/>
   </div>
 
   <script>
-    /* ====== USTAWIENIA DO PODMIANY PRZEZ CIEBIE ======
-       1) Gdy będziesz mieć docelowy link/tekst do QR – wpisz go tu:
-    */
+    /* ===== ustawienia do podmiany przez Ciebie ===== */
     const QR_DATA = ""; // np. "https://twoj-link.pl/sekret"
-    /*  2) Jeśli chcesz inną datę niż ta wynikająca z Si(14) – N(7) – Ca(20) = Fe(26),
-          podmień expected poniżej. */
-    const expected = { dd:14, mm:7, yyyy:2026 }; // 14-07-2026
+    const expected = { dd:14, mm:7, yyyy:2026 }; // 14-07-2026 (Si 14, N 7, Ca 20, Fe 26)
 
-    const status = document.getElementById('status');
     const dateInput = document.getElementById('dateInput');
     const dateMsg = document.getElementById('dateMsg');
     const qrBox = document.getElementById('qrBox');
@@ -227,7 +228,7 @@
     function verifyDate(){
       const got = normalizeDate(dateInput.value);
       if(!got){
-        dateMsg.textContent = 'Wpisz datę w formacie dd.mm.rrrr.';
+        dateMsg.textContent = 'Wpisz datę w formacie dd.mm.rrrr';
         dateMsg.className = 'status err';
         qrBox.classList.remove('active');
         return;
@@ -238,7 +239,7 @@
         showQR();
         showBunny();
       }else{
-        dateMsg.textContent = 'Nie ta data. Spróbuj spojrzeć na znaki w inny sposób…';
+        dateMsg.textContent = 'Nie ta data.';
         dateMsg.className = 'status err';
         qrBox.classList.remove('active');
         bunnyPop.classList.remove('active');
@@ -250,9 +251,9 @@
       qrBox.setAttribute('aria-hidden','false');
 
       if (QR_DATA && QR_DATA.trim().length){
-        const url = "https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=" + encodeURIComponent(QR_DATA.trim());
+        const url = "https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=" + encodeURIComponent(QR_DATA.trim());
         const img = new Image();
-        img.width = 220; img.height = 220; img.alt = "Kod QR";
+        img.width = 240; img.height = 240; img.alt = "Kod QR";
         img.onload = ()=>{
           qrHolder.replaceWith(img);
           qrCaption.textContent = 'Zeskanuj kod QR.';
@@ -271,17 +272,6 @@
       bunnyPop.setAttribute('aria-hidden','false');
       setTimeout(()=>{ bunnyPop.classList.remove('active'); }, 6000);
     }
-
-    // Easter egg: 3× klik w nagłówek → królik
-    (function(){
-      const h1 = document.querySelector('h1');
-      let clicks = 0, timer = null;
-      h1.addEventListener('click', ()=>{
-        clicks++; clearTimeout(timer);
-        timer = setTimeout(()=>{ clicks=0; }, 800);
-        if(clicks>=3){ showBunny(); clicks=0; }
-      });
-    })();
   </script>
 </body>
 </html>
