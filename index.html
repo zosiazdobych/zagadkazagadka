@@ -6,9 +6,9 @@
   <title>Si – N – Ca = Fe</title>
   <style>
     :root{
-      --bg:#5c0011;          /* bordowe tło */
-      --card:#751a2d;        /* ciemniejszy bordowy panel */
-      --accent:#f2e6e6;      /* jasny beż/róż do tekstów */
+      --bg:#5c0011;          /* bordo */
+      --card:#751a2d;        /* ciemniejsze bordo */
+      --accent:#f2e6e6;      /* jasny kontur */
       --muted:#d9a6a6;
       --ok:#4bd37b;
       --err:#ff6b6b;
@@ -20,7 +20,7 @@
       margin:0;
       font-family: sans-serif;
       color:var(--accent);
-      background: radial-gradient(1000px at 30% top, #7a1f33 0%, transparent 70%), var(--bg);
+      background:#5c0011;
       min-height:100vh;
       display:flex;align-items:center;justify-content:center;
       padding:24px;
@@ -37,14 +37,24 @@
       overflow:hidden;
     }
 
-    /* watermark królik */
+    /* outline królik w tle */
     .wrap::before{
       content:"";
       position:absolute;
       right:20px; bottom:20px;
       width:200px; height:200px;
-      opacity:.08;
-      background:url("królik.png") no-repeat center/contain;
+      opacity:.12;
+      background-repeat:no-repeat; background-size:contain;
+      background-position:center;
+      background-image:url('data:image/svg+xml;utf8,\
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">\
+<g fill="none" stroke="%23f2e6e6" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">\
+<path d="M60 22c-14 0-26 22-26 44 0 17 7 26 15 30"/>\
+<path d="M140 22c14 0 26 22 26 44 0 17-7 26-15 30"/>\
+<circle cx="100" cy="118" r="54"/>\
+<circle cx="78" cy="110" r="6"/><circle cx="122" cy="110" r="6"/>\
+<path d="M88 134c8 8 16 8 24 0"/>\
+</g></svg>');
       pointer-events:none;
     }
 
@@ -98,13 +108,13 @@
 
     /* królik po sukcesie */
     .bunny-pop{
-      position:fixed; inset:auto 20px 20px auto; 
-      width:200px; height:200px; display:none;
+      position:fixed; inset:auto 20px 20px auto;
+      width:220px; height:220px; display:none;
       animation:pop .35s ease forwards;
-      z-index:50; 
+      z-index:50;
     }
     .bunny-pop.active{ display:block }
-    .bunny-pop img{ width:100%; height:100%; }
+    .bunny-pop svg{ width:100%; height:100%; }
 
     @keyframes pop{from{opacity:0;transform:scale(.96)}to{opacity:1;transform:scale(1)}}
   </style>
@@ -112,7 +122,7 @@
 <body>
   <div class="wrap">
     <h1>Si – N – Ca = Fe</h1>
-    <p class="sub">ciepło,ciepło :), jestes coraz blizej.</p>
+    <p class="sub">ciepło,ciepło,gorąco</p>
 
     <div class="equation">
       <div class="el">Si</div>
@@ -136,13 +146,21 @@
     </div>
   </div>
 
-  <!-- duży królik -->
+  <!-- duży królik (outline) -->
   <div class="bunny-pop" id="bunnyPop">
-    <img src="bunny.png" alt="bunny"/>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+      <g fill="none" stroke="#f2e6e6" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M60 22c-14 0-26 22-26 44 0 17 7 26 15 30"/>
+        <path d="M140 22c14 0 26 22 26 44 0 17-7 26-15 30"/>
+        <circle cx="100" cy="118" r="54"/>
+        <circle cx="78" cy="110" r="6"/><circle cx="122" cy="110" r="6"/>
+        <path d="M88 134c8 8 16 8 24 0"/>
+      </g>
+    </svg>
   </div>
 
   <script>
-    const QR_DATA = "";
+    const QR_DATA = ""; // podmień na swój link
     const expected = { dd:14, mm:7, yyyy:2026 };
 
     const dateInput = document.getElementById('dateInput');
@@ -164,7 +182,7 @@
     function verifyDate(){
       const got = normalizeDate(dateInput.value);
       if(!got){
-        dateMsg.textContent = 'Podaj w formacie dd.mm.rrrr';
+        dateMsg.textContent = 'zastosuj format daty';
         dateMsg.className = 'status err';
         qrBox.classList.remove('active');
         return;
@@ -176,6 +194,221 @@
         showBunny();
       }else{
         dateMsg.textContent = 'zimno,zimno.';
+        dateMsg.className = 'status err';
+        qrBox.classList.remove('active');
+      }
+    }
+
+    function showQR(){
+      qrBox.classList.add('active');
+      if (QR_DATA){
+        const url = "https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=" + encodeURIComponent(QR_DATA);
+        qrHolder.innerHTML = `<img src="${url}" alt="Kod QR"/>`;
+        qrCaption.textContent = 'Zeskanuj kod QR.';
+      }
+    }
+    function showBunny(){
+      bunnyPop.classList.add('active');
+      setTimeout(()=>{ bunnyPop.classList.remove('active'); }, 6000);
+    }
+  </script>
+</body>
+</html><!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Si – N – Ca = Fe</title>
+  <style>
+    :root{
+      --bg:#5c0011;          /* bordo */
+      --card:#751a2d;        /* ciemniejsze bordo */
+      --accent:#f2e6e6;      /* jasny kontur */
+      --muted:#d9a6a6;
+      --ok:#4bd37b;
+      --err:#ff6b6b;
+      --shadow:0 10px 30px rgba(0,0,0,.35);
+      --radius:18px;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: sans-serif;
+      color:var(--accent);
+      background:#5c0011;
+      min-height:100vh;
+      display:flex;align-items:center;justify-content:center;
+      padding:24px;
+      overflow-x:hidden;
+    }
+    .wrap{
+      width:min(980px,100%);
+      background:var(--card);
+      border:1px solid rgba(255,255,255,.1);
+      box-shadow:var(--shadow);
+      border-radius:28px;
+      padding:28px;
+      position:relative;
+      overflow:hidden;
+    }
+
+    /* outline królik w tle */
+    .wrap::before{
+      content:"";
+      position:absolute;
+      right:20px; bottom:20px;
+      width:200px; height:200px;
+      opacity:.12;
+      background-repeat:no-repeat; background-size:contain;
+      background-position:center;
+      background-image:url('data:image/svg+xml;utf8,\
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">\
+<g fill="none" stroke="%23f2e6e6" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">\
+<path d="M60 22c-14 0-26 22-26 44 0 17 7 26 15 30"/>\
+<path d="M140 22c14 0 26 22 26 44 0 17-7 26-15 30"/>\
+<circle cx="100" cy="118" r="54"/>\
+<circle cx="78" cy="110" r="6"/><circle cx="122" cy="110" r="6"/>\
+<path d="M88 134c8 8 16 8 24 0"/>\
+</g></svg>');
+      pointer-events:none;
+    }
+
+    h1{margin:0;font-weight:800;letter-spacing:.2px}
+    p.sub{margin:.25rem 0 1rem;color:var(--muted)}
+
+    .equation{
+      display:flex; align-items:center; justify-content:center;
+      gap:18px; padding:22px;
+      border:1px solid rgba(255,255,255,.15);
+      border-radius:18px;
+      background:rgba(0,0,0,0.15);
+    }
+    .el, .op{
+      display:inline-flex; align-items:center; justify-content:center;
+      min-width:72px; height:80px;
+      border-radius:14px;
+      background:rgba(0,0,0,0.25);
+      border:1px solid rgba(255,255,255,.1);
+      font-weight:800; font-size:28px;
+      user-select:none;
+      color:var(--accent);
+    }
+
+    .status{ margin-top:12px; font-size:14px; color:var(--muted); }
+    .status.ok{ color:var(--ok) }
+    .status.err{ color:var(--err) }
+
+    .inputs{ display:flex; gap:10px; margin-top:16px }
+    input[type="text"]{
+      padding:12px 14px;
+      background:#400015;
+      border:1px solid rgba(255,255,255,.15);
+      border-radius:12px;
+      color:var(--accent);
+      outline:none;
+      min-width:200px;
+      font-size:16px;
+    }
+    button{
+      padding:12px 16px;border:0;border-radius:12px;
+      background:#8b1d34;
+      color:var(--accent);font-weight:700;cursor:pointer;
+      box-shadow:0 6px 16px rgba(0,0,0,.25);
+    }
+
+    /* QR */
+    .qr{ display:none; margin-top:20px; text-align:center }
+    .qr.active{ display:block; animation:pop .3s ease }
+    .qr img{ width:220px; height:220px; border-radius:12px; box-shadow:var(--shadow); background:white }
+
+    /* królik po sukcesie */
+    .bunny-pop{
+      position:fixed; inset:auto 20px 20px auto;
+      width:220px; height:220px; display:none;
+      animation:pop .35s ease forwards;
+      z-index:50;
+    }
+    .bunny-pop.active{ display:block }
+    .bunny-pop svg{ width:100%; height:100%; }
+
+    @keyframes pop{from{opacity:0;transform:scale(.96)}to{opacity:1;transform:scale(1)}}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Si – N – Ca = Fe</h1>
+    <p class="sub">Wpisz właściwą datę i odsłoń nagrodę.</p>
+
+    <div class="equation">
+      <div class="el">Si</div>
+      <div class="op">–</div>
+      <div class="el">N</div>
+      <div class="op">–</div>
+      <div class="el">Ca</div>
+      <div class="op">=</div>
+      <div class="el">Fe</div>
+    </div>
+
+    <div class="inputs">
+      <input id="dateInput" type="text" placeholder="dd.mm.rrrr" />
+      <button id="checkBtn">Sprawdź</button>
+    </div>
+    <div id="dateMsg" class="status"></div>
+
+    <div class="qr" id="qrBox">
+      <div id="qrHolder">Tu pojawi się QR</div>
+      <p id="qrCaption">Dodaj swój link w kodzie.</p>
+    </div>
+  </div>
+
+  <!-- duży królik (outline) -->
+  <div class="bunny-pop" id="bunnyPop">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+      <g fill="none" stroke="#f2e6e6" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M60 22c-14 0-26 22-26 44 0 17 7 26 15 30"/>
+        <path d="M140 22c14 0 26 22 26 44 0 17-7 26-15 30"/>
+        <circle cx="100" cy="118" r="54"/>
+        <circle cx="78" cy="110" r="6"/><circle cx="122" cy="110" r="6"/>
+        <path d="M88 134c8 8 16 8 24 0"/>
+      </g>
+    </svg>
+  </div>
+
+  <script>
+    const QR_DATA = ""; // podmień na swój link
+    const expected = { dd:14, mm:7, yyyy:2026 };
+
+    const dateInput = document.getElementById('dateInput');
+    const dateMsg = document.getElementById('dateMsg');
+    const qrBox = document.getElementById('qrBox');
+    const qrHolder = document.getElementById('qrHolder');
+    const qrCaption = document.getElementById('qrCaption');
+    const bunnyPop = document.getElementById('bunnyPop');
+
+    document.getElementById('checkBtn').addEventListener('click', verifyDate);
+
+    function normalizeDate(str){
+      if(!str) return null;
+      const parts = str.trim().split(/[.\-\/]/).map(p=>parseInt(p,10));
+      if(parts.length!==3) return null;
+      return {dd:parts[0], mm:parts[1], yyyy:parts[2]};
+    }
+
+    function verifyDate(){
+      const got = normalizeDate(dateInput.value);
+      if(!got){
+        dateMsg.textContent = 'Podaj datę w formacie dd.mm.rrrr';
+        dateMsg.className = 'status err';
+        qrBox.classList.remove('active');
+        return;
+      }
+      if(got.dd===expected.dd && got.mm===expected.mm && got.yyyy===expected.yyyy){
+        dateMsg.textContent = 'Brawo!';
+        dateMsg.className = 'status ok';
+        showQR();
+        showBunny();
+      }else{
+        dateMsg.textContent = 'Nie ta data.';
         dateMsg.className = 'status err';
         qrBox.classList.remove('active');
       }
