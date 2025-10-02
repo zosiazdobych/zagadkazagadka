@@ -111,8 +111,8 @@
 </head>
 <body>
   <div class="wrap">
-    <h1>Si – N – Ca - Fe</h1>
-    <p class="sub">zgaduj zgadula :), jestes coraz blizej.</p>
+    <h1>Si – N – Ca = Fe</h1>
+    <p class="sub">ciepło,ciepło, jestes coraz blizej.</p>
 
     <div class="equation">
       <div class="el">Si</div>
@@ -120,7 +120,7 @@
       <div class="el">N</div>
       <div class="op">–</div>
       <div class="el">Ca</div>
-      <div class="op">-</div>
+      <div class="op">=</div>
       <div class="el">Fe</div>
     </div>
 
@@ -170,12 +170,12 @@
         return;
       }
       if(got.dd===expected.dd && got.mm===expected.mm && got.yyyy===expected.yyyy){
-        dateMsg.textContent = 'Gorąco!!';
+        dateMsg.textContent = 'Gorąco! Brawo.!';
         dateMsg.className = 'status ok';
         showQR();
         showBunny();
       }else{
-        dateMsg.textContent = 'zimno,zimno';
+        dateMsg.textContent = 'zimno,zimno.';
         dateMsg.className = 'status err';
         qrBox.classList.remove('active');
       }
