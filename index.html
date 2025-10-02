@@ -5,47 +5,99 @@
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Si – N – Ca = Fe</title>
 <style>
+  /* ==== PROSTY STYL (BORDO + OUTLINE KRÓLIK) ==== */
+  :root{
+    --bordo:#5c0011;
+    --panel:#751a2d;
+    --ink:#f2e6e6;
+    --muted:#e7b9b9;
+    --ok:#4bd37b;
+    --err:#ff6b6b;
+  }
+  *{box-sizing:border-box}
   body{
-    margin:0; font-family: sans-serif;
-    background:#5c0011; /* bordo */
-    color:#f2e6e6; display:flex; align-items:center; justify-content:center;
-    min-height:100vh; padding:20px;
+    margin:0; font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+    background:#5c0011; color:var(--ink);
+    min-height:100vh; display:flex; align-items:center; justify-content:center; padding:20px;
   }
-  .shell{
-    position:relative; background:#751a2d; border-radius:20px; padding:30px;
-    box-shadow:0 8px 20px rgba(0,0,0,.5); max-width:600px; width:100%;
+  .wrap{
+    position:relative; width:min(900px,100%); background:var(--panel);
+    border:1px solid rgba(255,255,255,.15); border-radius:22px; padding:28px; overflow:hidden;
   }
 
-  h1{margin:0 0 10px; font-size:26px}
-  .equation{display:flex; gap:10px; justify-content:center; margin:20px 0}
-  .el,.op{padding:20px 24px; border-radius:12px; background:rgba(0,0,0,.3); font-weight:bold; font-size:22px}
+  /* WATERMARK KRÓLIK — inline SVG, żadnych <img> */
+  .bunny-bg{ position:absolute; right:14px; bottom:14px; width:210px; height:210px; opacity:.14; pointer-events:none }
+  .bunny-bg svg, .bunny-pop svg{ width:100%; height:100%; display:block }
+  .bunny-line{ stroke:var(--ink); stroke-width:6; fill:none; stroke-linecap:round; stroke-linejoin:round }
 
-  .inputs{display:flex; gap:10px; flex-wrap:wrap}
-  input{padding:10px; border-radius:8px; border:none; outline:none; background:#400015; color:#f2e6e6}
-  button{padding:10px 16px; border:none; border-radius:8px; background:#a1233c; color:#fff; font-weight:bold; cursor:pointer}
+  h1{margin:0 0 6px; font-weight:800}
+  .sub{margin:0 0 16px; color:var(--muted); font-size:14px}
 
-  .status{margin-top:10px; font-size:14px; color:#d9a6a6}
-  .status.ok{color:#4bd37b}
-  .status.err{color:#ff6b6b}
-
-  .qr{display:none; margin-top:20px; text-align:center}
-  .qr.active{display:block}
-
-  /* Królik jako watermark w tle */
-  .bunny{
-    position:absolute; right:10px; bottom:10px; width:150px; height:150px;
-    opacity:0.15; pointer-events:none;
+  .equation{
+    display:flex; gap:12px; justify-content:center; align-items:center;
+    padding:16px; border-radius:16px; background:rgba(0,0,0,.18); border:1px solid rgba(255,255,255,.15);
   }
-  .bunny svg{width:100%; height:100%}
-  .bunny .line{stroke:#f2e6e6; stroke-width:5; fill:none; stroke-linecap:round; stroke-linejoin:round}
+  .el,.op{
+    min-width:64px; height:64px; display:flex; align-items:center; justify-content:center;
+    border-radius:12px; background:rgba(0,0,0,.28); border:1px solid rgba(255,255,255,.16);
+    font-weight:800; font-size:22px;
+  }
+
+  .inputs{ display:flex; gap:10px; flex-wrap:wrap; margin-top:16px }
+  input{
+    padding:10px 12px; border-radius:10px; border:1px solid rgba(255,255,255,.2);
+    background:#400015; color:var(--ink); font-size:16px; outline:none; min-width:200px;
+  }
+  button{
+    padding:10px 14px; border:0; border-radius:10px; cursor:pointer;
+    background:#a1233c; color:#fff; font-weight:700;
+  }
+
+  .status{ margin-top:10px; font-size:14px; color:var(--muted) }
+  .status.ok{ color:var(--ok) }
+  .status.err{ color:var(--err) }
+
+  .qr{ display:none; margin-top:16px; text-align:center }
+  .qr.active{ display:block }
+  .qr .box{
+    width:220px; height:220px; margin:0 auto; border-radius:12px;
+    border:2px dashed rgba(255,255,255,.35); display:flex; align-items:center; justify-content:center;
+    background:rgba(0,0,0,.18); color:var(--muted);
+  }
+
+  /* Królik „wyskakujący” po sukcesie (też outline, inline SVG) */
+  .bunny-pop{ position:fixed; right:16px; bottom:16px; width:200px; height:200px; display:none; z-index:50; }
+  .bunny-pop.show{ display:block; animation:pop .35s ease }
+  @keyframes pop{ from{opacity:0; transform:scale(.95)} to{opacity:1; transform:scale(1)} }
+
+  @media (max-width:600px){
+    .el,.op{ min-width:52px; height:56px; font-size:18px }
+    .bunny-bg{ width:160px; height:160px }
+  }
 </style>
 </head>
 <body>
-  <div class="shell">
-    <h1>Si – N – Ca = Fe</h1>
-    <p>cieplej,cieplej...</p>
+  <div class="wrap">
+    <!-- KRÓLIK W TLE -->
+    <div class="bunny-bg" aria-hidden="true">
+      <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+        <g class="bunny-line">
+          <path d="M58 18c-18 0-32 28-32 54 0 18 8 30 18 36" />
+          <path d="M142 18c18 0 32 28 32 54 0 18-8 30-18 36" />
+          <circle cx="100" cy="120" r="58" />
+          <circle cx="80" cy="110" r="6" /><circle cx="120" cy="110" r="6" />
+          <path d="M100 120 l-6 6 m6-6 l6 6" />
+          <path d="M86 138c8 8 32 8 40 0" />
+          <path d="M56 126 h34" /><path d="M58 136 h30" />
+          <path d="M110 126 h34" /><path d="M112 136 h30" />
+        </g>
+      </svg>
+    </div>
 
-    <div class="equation">
+    <h1>Si – N – Ca = Fe</h1>
+    <p class="sub">ciepło,ciepło...</p>
+
+    <div class="equation" aria-label="równanie">
       <div class="el">Si</div><div class="op">–</div>
       <div class="el">N</div><div class="op">–</div>
       <div class="el">Ca</div><div class="op">=</div>
@@ -53,72 +105,77 @@
     </div>
 
     <div class="inputs">
-      <input id="dateInput" type="text" placeholder="dd.mm.rrrr" />
+      <input id="dateInput" type="text" placeholder="dd.mm.rrrr" autocomplete="off" inputmode="numeric" />
       <button id="checkBtn">Sprawdź</button>
     </div>
-    <div id="dateMsg" class="status"></div>
+    <div id="msg" class="status"></div>
 
-    <div id="qr" class="qr">
-      <div style="width:200px;height:200px;border:2px dashed #ccc;margin:auto;display:flex;align-items:center;justify-content:center">
-        Tu będzie QR
-      </div>
-      <p>Dodasz link później w kodzie.</p>
-    </div>
-
-    <!-- Królik (outline SVG) -->
-    <div class="bunny">
-      <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
-        <g class="line">
-          <!-- uszy -->
-          <path d="M60 20c-18 0-30 26-30 50 0 18 7 30 16 36"/>
-          <path d="M140 20c18 0 30 26 30 50 0 18-7 30-16 36"/>
-          <!-- głowa -->
-          <circle cx="100" cy="122" r="56"/>
-          <!-- oczy -->
-          <circle cx="80" cy="114" r="6"/>
-          <circle cx="120" cy="114" r="6"/>
-          <!-- nosek i pyszczek -->
-          <path d="M100 122 l-6 6 m6-6 l6 6"/>
-          <path d="M86 138c8 8 32 8 40 0"/>
-          <!-- wąsy -->
-          <path d="M58 126 h30"/>
-          <path d="M58 134 h28"/>
-          <path d="M112 126 h30"/>
-          <path d="M114 134 h28"/>
-        </g>
-      </svg>
+    <div id="qr" class="qr" aria-hidden="true">
+      <div class="box">Tu pojawi się QR</div>
+      <p style="color:var(--muted)">Link dodasz później w kodzie (stała <code>QR_DATA</code>).</p>
     </div>
   </div>
 
-<script>
-  const expected = { dd:14, mm:7, yyyy:2026 };
-  const dateInput = document.getElementById('dateInput');
-  const dateMsg = document.getElementById('dateMsg');
-  const qr = document.getElementById('qr');
+  <!-- KRÓLIK PO SUKCESIE -->
+  <div id="bPop" class="bunny-pop" aria-hidden="true">
+    <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+      <g class="bunny-line" style="stroke-width:7">
+        <path d="M58 18c-18 0-32 28-32 54 0 18 8 30 18 36" />
+        <path d="M142 18c18 0 32 28 32 54 0 18-8 30-18 36" />
+        <circle cx="100" cy="120" r="58" />
+        <circle cx="80" cy="110" r="6" /><circle cx="120" cy="110" r="6" />
+        <path d="M100 120 l-6 6 m6-6 l6 6" />
+        <path d="M86 138c8 8 32 8 40 0" />
+        <path d="M56 126 h34" /><path d="M58 136 h30" />
+        <path d="M110 126 h34" /><path d="M112 136 h30" />
+      </g>
+    </svg>
+  </div>
 
-  document.getElementById('checkBtn').addEventListener('click', checkDate);
+<script>
+  /* ===== LOGIKA (zero zewnętrznych plików) ===== */
+  const expected = { dd:14, mm:7, yyyy:2026 };       // 14.07.2026
+  const QR_DATA  = "";                                // <- jak będziesz mieć link, wpisz tutaj
+
+  const input = document.getElementById('dateInput');
+  const msg   = document.getElementById('msg');
+  const qr    = document.getElementById('qr');
+  const bPop  = document.getElementById('bPop');
+
+  document.getElementById('checkBtn').addEventListener('click', onCheck);
+  input.addEventListener('keydown', e => { if(e.key==='Enter') onCheck(); });
 
   function parseDate(str){
-    const p = str.trim().split(/[.\-\/]/).map(n=>parseInt(n,10));
-    if(p.length!==3) return null;
-    return {dd:p[0], mm:p[1], yyyy:p[2]};
+    const parts = str.trim().split(/[.\-\/]/).map(n=>parseInt(n,10));
+    if(parts.length!==3 || parts.some(Number.isNaN)) return null;
+    return { dd:parts[0], mm:parts[1], yyyy:parts[2] };
   }
 
-  function checkDate(){
-    const got = parseDate(dateInput.value);
+  function onCheck(){
+    const got = parseDate(input.value);
     if(!got){
-      dateMsg.textContent="fecha...";
-      dateMsg.className="status err"; qr.classList.remove("active"); return;
+      msg.textContent = 'fecha,fecha';
+      msg.className = 'status err'; qr.classList.remove('active'); return;
     }
     if(got.dd===expected.dd && got.mm===expected.mm && got.yyyy===expected.yyyy){
-      dateMsg.textContent="Gorąco,brawo!";
-      dateMsg.className="status ok";
-      qr.classList.add("active");
+      msg.textContent = 'gorąco!!'; msg.className = 'status ok';
+      showQR(); showBunny();
     }else{
-      dateMsg.textContent="zimno,zimno.";
-      dateMsg.className="status err";
-      qr.classList.remove("active");
+      msg.textContent = 'zimno,zimno.'; msg.className = 'status err';
+      qr.classList.remove('active');
     }
+  }
+
+  function showQR(){
+    qr.classList.add('active'); qr.setAttribute('aria-hidden','false');
+    if(QR_DATA){
+      const url = 'https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=' + encodeURIComponent(QR_DATA);
+      qr.querySelector('.box').innerHTML = '<img alt="QR" width="240" height="240" src="'+url+'">';
+    }
+  }
+  function showBunny(){
+    bPop.classList.add('show'); bPop.setAttribute('aria-hidden','false');
+    setTimeout(()=>bPop.classList.remove('show'), 5500);
   }
 </script>
 </body>
